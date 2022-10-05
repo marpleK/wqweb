@@ -1,0 +1,54 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <h1 class="text-center">Edit Game</h1>
+    <div class="col-6 offset-3">
+        <form action="/games/<%=game._id%>?_method=PUT" method="POST" novalidate class="validated-form">
+            <div class="mb-3">
+                <label class="form-label" for="Black">Black</label>
+                <input class="form-control" type="text" id="Black" name="game[Black]"
+                    value="<%=game.Black %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="White">White</label>
+                <input class="form-control" type="text" id="White" name="game[White]"
+                    value="<%=game.White %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="Result">Result</label>
+                <input class="form-control" type="text" id="Result" name="game[Result]"
+                    value="<%=game.Result %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="Location">Location</label>
+                <input class="form-control" type="text" id="Location" name="game[Location]"
+                    value="<%=game.Location %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="Date">Date</label>
+                <textarea class="form-control" type="text" id="Date" name="game[Date]"
+                    required><%= game.Date%></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-info">Update Game</button>
+            </div>
+        </form>
+        <a href="/games/<%= game._id%>">Back To Game</a>
+
+    </div>
+</div>

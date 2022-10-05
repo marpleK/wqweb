@@ -1,0 +1,272 @@
+<% layout('layouts/boilerplate')%>
+
+    <div style="text-align: center; width: 100%">
+        <div class="row justify-content-center" style="display: inline-block;">
+            <div style="float: left;" class="col-md-5 offset-md-1">
+                <div id="board"></div>
+                <p class="controls" style="width: 500px; text-align: center;">
+                    <div>
+                        <a href="#" onclick="move(0); return false;"><i class="bi bi-skip-start-fill"></i></a>
+                        <a href="#" onclick="move(-10); return false;"><i class="bi bi-rewind-fill"></i></a>
+                        <a href="#" onclick="move(-1); return false;"><i class="bi bi-caret-left-fill"></i></a>
+                        <strong id="move">1</strong> / <strong id="moves">1</strong>
+                        <a href="#" onclick="move(1); return false;"><i class="bi bi-caret-right-fill"></i></a>
+                        <a href="#" onclick="move(10); return false;"><i class="bi bi-fast-forward-fill"></i></a>
+                        <a href="#" onclick="move(1000); return false;"><i class="bi bi-skip-end-fill"></i></a>
+                        <a href="#" onclick="displayNewestStone(); return false;"><i class="bi bi-1-circle"></i></a>
+                        <a href="#" onclick="displayAllStone(); return false;"><i class="bi bi-123"></i></a>
+                    </div>
+                    <div>
+
+
+                        
+                    </div>
+                    <div>
+                        <a href="#" onclick="markAlpha(); return false;"><i class="bi bi-c-circle"></i></a>
+                        Variation: <strong id="variation">1</strong> / <strong id="variations">1</strong>
+                        <a href="#" onclick="nextVariation(); return false;"><i title="variation"
+                                class="bi bi-arrow-counterclockwise"></i></a>
+                        <a href="#" onclick="deleteMove(); return false;"><i class="bi bi-trash"></i></a>
+                        <a href="#" onclick="variation(); return false;"><i class="bi bi-diagram-2"></i></a>
+                    </div>
+
+                </p>
+                <hr class="my-4">
+                <h2>Comments</h2>
+                <div class="form-group mb-3">
+                    <label for="Comments"></label>
+                    <textarea class="form-control" id="Comments" rows="3"></textarea>
+                </div>
+                <div>
+                    <p class="mb-3">
+                        <button type="button" class="btn btn-outline-dark" onclick="addComment()">Add Comment</button>
+                    </p>
+                </div>
+            </div>
+            <div id="infopane" style="float: left; padding: 1em; text-align: center;" class="col-md-4 ">
+                <h2>Game information</h2>
+                <form id="saveInfo" class="row g-3 validated-form">
+                    <div class="col-md-6">
+                        <label class="form-label" for="Black">黑棋</label>
+                        <input class="form-control" type="text" id="SGFBlack">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="BlackRank">黑棋棋力</label>
+                        <input class="form-control" type="text" id="SGFBlackRank">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="White">白棋</label>
+                        <input class="form-control" type="text" id="SGFWhite">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="WhiteRank">白棋棋力</label>
+                        <input class="form-control" type="text" id="SGFWhiteRank">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Result">結果</label>
+                        <input class="form-control" type="text" id="SGFResult">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Date">日期</label>
+                        <input class="form-control" type="text" id="SGFDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Competition">比賽名稱</label>
+                        <input class="form-control" type="text" id="SGFCompetition">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Location">地點</label>
+                        <input class="form-control" type="text" id="SGFLocation">
+                    </div>
+
+                </form>
+                <hr class="my-4">
+                <button type="submit" class="btn btn-outline-dark" onclick="saveInfoDownloadFile()">Download
+                    file</button>
+                <form action="/games" method="POST" novalidate class="row g-3 validated-form" id="submitForm">
+                    <div class="col-md-6">
+                        <input class="form-control" type="hidden" id="Black" name="game[Black]">
+                        <input class="form-control" type="hidden" id="BlackRank" name="game[BlackRank]">
+                        <input class="form-control" type="hidden" id="White" name="game[White]">
+                        <input class="form-control" type="hidden" id="WhiteRank" name="game[WhiteRank]">
+                        <input class="form-control" type="hidden" id="Result" name="game[Result]">
+                        <input class="form-control" type="hidden" id="Date" name="game[Date]">
+                        <input class="form-control" type="hidden" id="Competition" name="game[Competition]">
+                        <input class="form-control" type="hidden" id="Location" name="game[Location]">
+                        <input class="form-control" type="hidden" id="SGF" name="game[SGF]">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type='button' class="btn btn-outline-dark" value='Save file' id="saveFile" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <script type="text/javascript">
+        var SGFParams = ['date', 'gameName', 'result', 'location', 'black', 'white', 'blackRank', 'whiteRank', 'blackTeam', 'whiteTeam'
+        ]
+
+        var BOARD_SIZE = 19;
+        var jrecord = new JGO.Record(BOARD_SIZE);
+        var jboard = jrecord.jboard;
+        var jsetup = new JGO.Setup(jboard, JGO.BOARD.medium);
+        var player = JGO.BLACK; // next player
+        var ko = false, lastMove = false; // ko coordinate and last move coordinate
+        var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
+        var variationStatus = false;
+        var record = [];
+        var colnames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+        var SGFLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        var fieldMap = {
+            'AN': 'annotator',
+            'CP': 'copyright',
+            'DT': 'date',
+            'EV': 'event',
+            'GN': 'gameName',
+            'OT': 'overtime',
+            'RO': 'round',
+            'RE': 'result',
+            'RU': 'rules',
+            'SO': 'source',
+            'TM': 'time',
+            'PC': 'location',
+            'PB': 'black',
+            'PW': 'white',
+            'BR': 'blackRank',
+            'WR': 'whiteRank',
+            'BT': 'blackTeam',
+            'WT': 'whiteTeam'
+        };
+
+        var moveNum = 0, moves = 0, gotoMove = 0;
+        var moveNumber = 0
+
+
+
+        jsetup.setOptions({ stars: { points: 9 } });
+        jsetup.create('board', function (canvas) {
+
+            canvas.addListener('click', function (coord, ev) {
+                if (jrecord.current) {
+                    player = (jrecord.current.info.playeralphabat == 'B') ? JGO.WHITE : JGO.BLACK;
+                }
+                var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
+
+                if (ev.shiftKey) { // on shift do edit
+                    if (jboard.getMark(coord) == JGO.MARK.NONE)
+                        jboard.setMark(coord, JGO.MARK.SELECTED);
+                    else
+                        jboard.setMark(coord, JGO.MARK.NONE);
+                    return;
+                }
+
+                // clear hover away - it'll be replaced or then it will be an illegal move
+                // in any case so no need to worry about putting it back afterwards
+                if (lastHover)
+                    jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+
+                lastHover = false;
+                if (variationStatus) {
+                    applyVarMove(player, coord);
+                }
+                if (jrecord.root == null || jrecord.current.children.length == 0) {
+                    applyMove(player, coord);
+                }
+            });
+
+
+            canvas.addListener('mousemove', function (coord, ev) {
+                if (coord.i == -1 || coord.j == -1 || (coord.i == lastX && coord.j == lastY))
+                    return;
+
+                if (lastHover) // clear previous hover if there was one
+                    jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+
+                lastX = coord.i;
+                lastY = coord.j;
+
+                if (jboard.getType(coord) == JGO.CLEAR && jboard.getMark(coord) == JGO.MARK.NONE) {
+                    jboard.setType(coord, player == JGO.BLACK ? JGO.DIM_BLACK : JGO.DIM_WHITE);
+                    lastHover = true;
+                } else
+                    lastHover = false;
+            });
+
+            canvas.addListener('mouseout', function (ev) {
+                if (lastHover)
+                    jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+
+                lastHover = false;
+            });
+        });
+
+        $("#saveFile").click(function () {
+            saveInfo()
+            sgfFile = jrecordToSGF()
+            document.getElementById("SGF").value = sgfFile;
+            $("#submitForm").submit();
+        });
+
+        function deleteMove() {
+            if (jrecord.current.info.moveNum == 1) {
+                window.location.reload();
+            } else {
+                move(-1)
+                jrecord.current.children = []
+                updateInfo();
+            }
+        }
+        function variation() {
+            if (jrecord.current.children.length == 0){
+                alert("最新手無法增加變化圖")
+            }else {
+            if (variationStatus) {
+                variationStatus = false;
+            } else {
+                variationStatus = true;
+            }}
+        }
+
+        function applyVarMove(player, coord) {
+
+
+            var play = jboard.playMove(coord, player, ko);
+
+
+            if (play.success) {
+                
+                node = jrecord.createVarNode(true);
+                node.info.captures[player] += play.captures.length; // tally captures
+                playeralphabat = (player == JGO.BLACK) ? 'B' : 'W';
+                node.info.playeralphabat = playeralphabat
+                node.info.coord = `${playeralphabat}[${SGFLetters[coord.i]}${SGFLetters[coord.j]}]`;
+                node.setType(coord, player); // play stone
+                node.setType(play.captures, JGO.CLEAR); // clear opponent's stones
+
+                if (node.varParent.info.varNum !== undefined) {
+                    node.info.varNum = node.parent.info.varNum + 1
+                } else {
+                    node.info.varNum = 1
+                }
+
+                if (lastMove) {
+                    node.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
+                }
+                if (ko) {
+                    node.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
+                }
+                node.setMark(coord, JGO.MARK.CIRCLE); // mark move
+                lastMove = coord;
+
+                if (play.ko)
+                    node.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
+                ko = play.ko;
+                updateInfo();
+            }
+        }
+
+    </script>

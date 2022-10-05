@@ -1,0 +1,123 @@
+<% layout('layouts/boilerplate')%>
+    <div>
+        <p id="comments"></p>
+    </div>
+    <div style="text-align: center; width: 100%">
+        <div style="display: inline-block;">
+            <div style="float: left;">
+                <div id="board"></div>
+                <p class="controls" style="width: 500px;">
+                    <a href="#" onclick="move(0); return false;"><i class="bi bi-skip-start-fill"></i></a>
+                    <a href="#" onclick="move(-10); return false;"><i class="bi bi-rewind-fill"></i></a>
+                    <a href="#" onclick="move(-1); return false;"><i class="bi bi-caret-left-fill"></i></a>
+                    <strong id="move">1</strong> / <strong id="moves">1</strong>
+                    <a href="#" onclick="move(1); return false;"><i class="bi bi-caret-right-fill"></i></a>
+                    <a href="#" onclick="move(10); return false;"><i class="bi bi-fast-forward-fill"></i></a>
+                    <a href="#" onclick="move(1000); return false;"><i class="bi bi-skip-end-fill"></i></a>
+                    Variation: <strong id="variation">1</strong> / <strong id="variations">1</strong>
+                    <a href="#" onclick="nextVariation(); return false;"><i title="variation"
+                            class="bi bi-arrow-counterclockwise"></i></a>
+                </p>
+                <hr class="my-4">
+                <h2>Comments</h2>
+                <div class="py-2 mb-5">
+                    <div class="card h-300 card-body">
+                        <p id="comments"></p>
+                    </div>
+                </div>
+            </div>
+            <div id="infopane" style="float: left; padding: 1em; text-align: left;">
+                <h2>Game information</h2>
+                <p id="menu" class="controls" style="width: 300px;">
+                </p>
+
+
+                <p id="information"></p>
+                <p>
+                    Black captures: <strong id="black_captures"></strong><br>
+                    White captures: <strong id="white_captures"></strong>
+                </p>
+
+
+                <hr class="my-4">
+                <div class="mb-3" style="text-align: center;">
+                    <button type="submit" class="btn btn-outline-dark" onclick="downloadFile()">Download
+                        file</button>
+                </div>
+                <div class="mb-3" style="text-align: center;">
+                    <a class="btn btn-outline-dark" href="/games">所有棋局</a>
+                </div>
+
+                <% if( currentUser && game.author.equals(currentUser._id)) {%>
+                    <div class="mb-3" style="text-align: center;">
+                        <div class="card-body">
+                            <a class="card-link btn btn-outline-info" href="/games/<%=game._id%>/edit">Edit</a>
+                            <form class="d-inline" action="/games/<%=game._id%>?_method=DELETE" method="POST">
+                                <button class="btn btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    <% } %>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src='/javascripts/jgoboard-latest.js'></script>
+    <script src='/javascripts/medium/board.js'></script>
+    <script src='/javascripts/weiqi.js'></script>
+    <script type="text/javascript">
+        var moveNum = 0, moves = 0, gotoMove = 0;
+        var fieldMap = {
+            'AN': 'annotator',
+            'CP': 'copyright',
+            'DT': 'date',
+            'EV': 'event',
+            'GN': 'gameName',
+            'OT': 'overtime',
+            'RO': 'round',
+            'RE': 'result',
+            'RU': 'rules',
+            'SO': 'source',
+            'TM': 'time',
+            'PC': 'location',
+            'PB': 'black',
+            'PW': 'white',
+            'BR': 'blackRank',
+            'WR': 'whiteRank',
+            'BT': 'blackTeam',
+            'WT': 'whiteTeam'
+        };
+        var jrecord = false, jnotifier;
+        var SGFParams = ['date', 'gameName', 'result', 'location', 'black', 'white', 'blackRank', 'whiteRank', 'blackTeam', 'whiteTeam'
+        ]
+        var game = <%- JSON.stringify(game) %>
+
+
+
+
+        $(document).ready(function () {
+            $("body").keydown(function (e) { // left/right arrow navigation
+                if (e.keyCode == 37) move(-1);
+                else if (e.keyCode == 39) move(1);
+            });
+
+            var jboard = new JGO.Board(19, 19), jsetup; // hardcoded size
+
+            jsetup = new JGO.Setup(jboard, JGO.BOARD.medium);
+
+            // we can use this to change the board to listen to
+            notifier = jsetup.getNotifier();
+
+            jsetup.create('board', function (canvas) {
+                canvas.addListener('click', function (c) {
+                    if (c.i < 10) move(-1); // back
+                    if (c.i > 10) move(1); // forward
+                });
+            });
+            loadSGF(game["SGF"]);
+        });
+
+
+    </script>

@@ -1,0 +1,115 @@
+<% layout('layouts/boilerplate')%>
+    <link rel="stylesheet" href="/stylesheets/table_style.css">
+    <h1>所有棋局</h1>
+
+
+    <div class="content">
+
+        <div class="panel panel-primary filterable">
+            <div class="panel-heading">
+                <h3 class="panel-title"></h3>
+
+            </div>
+            <table id="table_id" data-toggle="table" data-search="true" data-filter-control="true" data-show-export="true"
+                data-click-to-select="true" data-toolbar="#toolbar" class="table-responsive">
+                <thead>
+                    <tr class="filters">
+                        <th scope="col">
+                            <label class="control control--checkbox">
+                                <input type="checkbox" class="js-check-all" />
+                                <div class="control__indicator"></div>
+                            </label>
+                        </th>
+                        <th><input type="text" class="form-control" placeholder="前往棋局" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="記譜人" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="比賽名稱" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="日期" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="黑方" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="白方" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="對局結果" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="記譜時間" disabled></th>
+
+                    </tr>
+                </thead>
+
+
+                <tbody>
+                    <% for (let game of games){%>
+                        <tr>
+                            <th scope="row">
+                                <label class="control control--checkbox">
+                                    <input type="checkbox" />
+                                    <div class="control__indicator"></div>
+                                </label>
+                            </th>
+                            <td>
+                                <a class="btn btn-outline-dark" href="/games/<%=game._id%>">Go</a>
+                            </td>
+                            <td>
+                                <%= game.owner %>
+                            </td>
+                            <td>
+                                <%= game.gameName %>
+                            </td>
+                            <td>
+                                <%= game.date %>
+                            </td>
+                            <td>
+                                <%= game.black %>
+                            </td>
+                            <td>
+                                <%= game.white %>
+                            </td>
+                            <td>
+                                <%= game.result %>
+                            </td>
+                            <td>
+                                <%= moment(game.updatedAt).utcOffset(8).format('YYYY-MM-DD') %>
+                            </td>
+
+                        </tr>
+                        <% }%>
+
+
+
+
+
+                </tbody>
+            </table>
+
+
+
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#table_id').DataTable();
+        });
+        $(function () {
+
+            $('.js-check-all').on('click', function () {
+
+                if ($(this).prop('checked')) {
+                    $('th input[type="checkbox"]').each(function () {
+                        $(this).prop('checked', true);
+                        $(this).closest('tr').addClass('active');
+                    })
+                } else {
+                    $('th input[type="checkbox"]').each(function () {
+                        $(this).prop('checked', false);
+                        $(this).closest('tr').removeClass('active');
+                    })
+                }
+
+            });
+
+            $('th[scope="row"] input[type="checkbox"]').on('click', function () {
+                if ($(this).closest('tr').hasClass('active')) {
+                    $(this).closest('tr').removeClass('active');
+                } else {
+                    $(this).closest('tr').addClass('active');
+                }
+            });
+        });
+    </script>

@@ -1,0 +1,133 @@
+<% layout('layouts/boilerplate')%>
+    <div class="mb-3" style="text-align: center;">
+        <div class="btn-group">
+            <a class="btn btn-dark ">上傳單個檔案</a>
+            <a href="/games/new_load_multiple" class="btn btn-dark active">上傳多個檔案</a>
+        </div>
+    </div>
+    <div style="text-align: center; width: 100%">
+        <div style="display: inline-block;">
+            <div style="float: left;">
+                <div id="board"></div>
+                <p class="controls" style="width: 500px;">
+                    <a href="#" onclick="move(0); return false;"><i class="bi bi-skip-start-fill"></i></a>
+                    <a href="#" onclick="move(-10); return false;"><i class="bi bi-rewind-fill"></i></a>
+                    <a href="#" onclick="move(-1); return false;"><i class="bi bi-caret-left-fill"></i></a>
+                    <strong id="move">1</strong> / <strong id="moves">1</strong>
+                    <a href="#" onclick="move(1); return false;"><i class="bi bi-caret-right-fill"></i></a>
+                    <a href="#" onclick="move(10); return false;"><i class="bi bi-fast-forward-fill"></i></a>
+                    <a href="#" onclick="move(1000); return false;"><i class="bi bi-skip-end-fill"></i></a>
+                    Variation: <strong id="variation">1</strong> / <strong id="variations">1</strong>
+                    <a href="#" onclick="nextVariation(); return false;"><i title="variation"
+                            class="bi bi-arrow-counterclockwise"></i></a>
+                </p>
+                <hr class="my-4">
+                <h2>Comments</h2>
+                <div class="py-2 mb-5">
+                    <div class="card h-300 card-body">
+                        <p id="comments"></p>
+                    </div>
+                </div>
+            </div>
+            <div id="infopane" style="float: left; padding: 1em; text-align: left;">
+                <p id="menu" class="controls" style="width: 300px;">
+                <div class="input-group">
+                    <label for="formFile" class="form-label"></label>
+                    <input class="form-control" type="file" id="formFile">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-dark" onclick="loadFile();">Load file</button>
+                    </div>
+                </div>
+                </p>
+
+                <p id="information"></p>
+                <p>
+                    Black captures: <strong id="black_captures"></strong><br>
+                    White captures: <strong id="white_captures"></strong>
+                </p>
+
+
+                <hr class="my-4">
+                <div>
+                    <form action="/games" method="POST" novalidate class="row g-3 validated-form">
+                        <div class="col-md-6">
+                            <input class="form-control" type="hidden" id="black" name="game[black]">
+                            <input class="form-control" type="hidden" id="blackRank" name="game[blackRank]">
+                            <input class="form-control" type="hidden" id="white" name="game[white]">
+                            <input class="form-control" type="hidden" id="whiteRank" name="game[whiteRank]">
+                            <input class="form-control" type="hidden" id="result" name="game[result]">
+                            <input class="form-control" type="hidden" id="date" name="game[date]">
+                            <input class="form-control" type="hidden" id="gameName" name="game[gameName]">
+                            <input class="form-control" type="hidden" id="location" name="game[location]">
+                            <input class="form-control" type="hidden" id="SGF" name="game[SGF]">
+                        </div>
+
+                        <div class="mb-3" style="text-align: center;">
+                            <button type="submit" class="btn btn-outline-dark">Save file</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        var moveNum = 0, moves = 0, gotoMove = 0;
+        var jrecord = false, jnotifier;
+        var SGFParams = ['date', 'gameName', 'result', 'location', 'black', 'white', 'blackRank', 'whiteRank']
+        var fieldMap = {
+            'AN': 'annotator',
+            'CP': 'copyright',
+            'DT': 'date',
+            'EV': 'event',
+            'GN': 'gameName',
+            'OT': 'overtime',
+            'RO': 'round',
+            'RE': 'result',
+            'RU': 'rules',
+            'SO': 'source',
+            'TM': 'time',
+            'PC': 'location',
+            'PB': 'black',
+            'PW': 'white',
+            'BR': 'blackRank',
+            'WR': 'whiteRank',
+            'BT': 'blackTeam',
+            'WT': 'whiteTeam'
+        };
+
+
+
+        $(document).ready(function () {
+            $("body").keydown(function (e) { // left/right arrow navigation
+                if (e.keyCode == 37) move(-1);
+                else if (e.keyCode == 39) move(1);
+            });
+
+            var jboard = new JGO.Board(19, 19), jsetup; // hardcoded size
+
+            jsetup = new JGO.Setup(jboard, JGO.BOARD.medium);
+
+            // we can use this to change the board to listen to
+            notifier = jsetup.getNotifier();
+
+            jsetup.create('board', function (canvas) {
+                canvas.addListener('click', function (c) {
+                    if (c.i < 10) move(-1); // back
+                    if (c.i > 10) move(1); // forward
+                });
+            });
+        });
+
+
+
+    </script>
+    <script src='/javascripts/jgoboard-latest.js'></script>
+    <script src='/javascripts/medium/board.js'></script>
+    <script src='/javascripts/weiqi.js'></script>

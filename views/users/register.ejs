@@ -1,0 +1,44 @@
+<% layout('layouts/boilerplate')%>
+
+<div class="container d-flex justify-content-center align-items-center mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 col-xl-4 offset-xl-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">註冊</h5>
+                    <form action="/register" method="POST" class="validated-form" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label" for="username">使用者名稱</label>
+                            <input class="form-control" type="text" id="username" name="username" required autofocus>
+                            <div class="valid-feedback">
+
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="email">使用者信箱</label>
+                            <input class="form-control" type="email" id="email" name="email" required>
+                            <div class="valid-feedback">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password">使用者密碼</label>
+                            <input class="form-control" type="password" id="password" name="password" required>
+                            <div class="valid-feedback">
+                            </div>
+                        </div>
+                        <button class="btn btn-success btn-block">註冊</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
